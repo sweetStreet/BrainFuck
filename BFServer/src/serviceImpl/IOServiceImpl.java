@@ -26,6 +26,11 @@ public class IOServiceImpl implements IOService{
 		if(!f.exists()){
 			try {
 				f.createNewFile();
+				BufferedWriter bw=new BufferedWriter(new FileWriter(newfilename));
+				bw.write(file);
+				bw.close();
+				isSuccess=true;
+				return isSuccess;
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

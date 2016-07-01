@@ -10,15 +10,15 @@ import service.IOService;
 import service.UserService;
 
 public class ExecuteServiceImpl implements ExecuteService{
-	int[] start=new int[8000];//记录 [ 在code中出现的位置
-	int[] judge=new int[8000];//记录data数组中要进行是否等于0判断的位置
-	byte[] data=new byte[8000];
-	int pointer=0;//指针,记录data数组中正在被执行的数的位置
-	int count;//指针，记录
-	int comma;//记录逗号的个数，确定从数据区读入的字符
 	String output;
 	@Override
 	public String execute(String code, String param) throws RemoteException {		
+		int[] start=new int[8000];//记录 [ 在code中出现的位置
+		int[] judge=new int[8000];//记录data数组中要进行是否等于0判断的位置
+		byte[] data=new byte[8000];
+		int pointer=0;//指针,记录data数组中正在被执行的数的位置
+		int count;//指针，记录
+		int comma;//记录逗号的个数，确定从数据区读入的字符
 			output="";
 			count=0;
 			comma=0;

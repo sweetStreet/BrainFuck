@@ -41,12 +41,16 @@ public class UserServiceImpl implements UserService{
 	public boolean logout(String username) throws RemoteException {
 		boolean result=false;
 		if(list.contains(username)){
-			list.remove(username);
 			result=true;
 		}
 		return result;
 	}
-
+	
+	@Override
+	public void dologout(String username) throws RemoteException {
+		list.remove(username);
+	}
+	
 	public boolean judgeSignup(String username){
 		File file=new File(FILEPATH);
 		String s=null;

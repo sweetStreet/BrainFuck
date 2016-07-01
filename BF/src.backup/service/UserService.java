@@ -1,4 +1,4 @@
-//服务器UserService的Stub，内容相同
+//服务器UserService的Stub，内容相�?
 package service;
 
 import java.rmi.Remote;

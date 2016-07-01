@@ -14,7 +14,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.rmi.RemoteException;
-import java.rmi.server.Operation;
 import java.rmi.server.RemoteObject;
 import java.rmi.server.RemoteServer;
 import java.rmi.server.RemoteStub;
@@ -43,11 +42,6 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.plaf.FontUIResource;
 
-import org.xml.sax.AttributeList;
-import org.xml.sax.DocumentHandler;
-import org.xml.sax.Locator;
-import org.xml.sax.SAXException;
-
 import rmi.RemoteHelper;
 import service.IOService;
 
@@ -55,20 +49,18 @@ import service.IOService;
 public class MainFrame extends JFrame {
 	private JTextArea codeTextArea;
 	private JTextArea inputTextArea;
-	private JTextArea resultTextArea;
+	private JLabel resultLabel;
 	private JFrame frame;
 	private JLabel labelUser;
 	private JMenuItem redoMenuItem;
 	private JMenuItem undoMenuItem;
 	boolean isNewSuccess=false;
 	String presentFile="";
-	ArrayList<String> undo=new ArrayList<String>();
-	int indexUndo=-1;//撤销
+	/*ArrayList<String> undo=new ArrayList<String>();
+	int indexUndo=0;//撤销
 	ArrayList<String> redo=new ArrayList<String>();
 	int indexRedo=-1;//重做
-	ArrayList<String> list=new ArrayList<String>();
-	int index=-1;
-	
+	*/
 	public MainFrame() {
 		 // 设置风格
 		try {
@@ -80,6 +72,7 @@ public class MainFrame extends JFrame {
 		}
 		
 		//设置字体
+			//Font font=new Font("Monospaced",Font.BOLD,19);
 		    Font font=new Font("Lovely",Font.BOLD,19);
 			Font fontMenu=new Font("Cute",Font.BOLD,15);
 			UIManager.put("TextArea.font",font);
@@ -107,7 +100,11 @@ public class MainFrame extends JFrame {
 		JMenuItem saveMenuItem = new JMenuItem("Save");
 		fileMenu.add(saveMenuItem);
 		saveMenuItem.setFont(fontMenu);
+		//JMenuItem exitMenuItem = new JMenuItem("Exit");
+		//fileMenu.add(exitMenuItem);
 		frame.setJMenuBar(menuBar);
+		//frame.setUndecorated(true);
+		//frame.setLocationRelativeTo(null);
 		
 		//run菜单，其中包括execute
 		JMenu runMenu=new JMenu("Run");
@@ -125,7 +122,7 @@ public class MainFrame extends JFrame {
 		versionMenuItem.setFont(fontMenu);
 		versionMenu.add(versionMenuItem);
 		
-		//可以实现撤销和重做功能
+		//可以实现撤销和重做功�?
 		JMenu editMenu=new JMenu("Edit");
 		editMenu.setFont(fontMenu);
 		menuBar.add(editMenu);
@@ -138,7 +135,7 @@ public class MainFrame extends JFrame {
 		redoMenuItem.setEnabled(false);
 		undoMenuItem.setEnabled(false);
 		
-		//用户菜单，其中包括注册,登录和退出
+		//用户菜单，其中包括注�?,登录和�??�?
 		JMenu userMenu=new JMenu("User");
 		userMenu.setFont(fontMenu);
 		menuBar.add(userMenu);
@@ -157,43 +154,48 @@ public class MainFrame extends JFrame {
 		labelUser=new JLabel(loginImage);
 		menuBar.add(labelUser);
 		
-		//代码区
+		//代码�?
 		codeTextArea = new JTextArea();
 		codeTextArea.setLineWrap(true);
 		TitledBorder t1=new TitledBorder("Code Section");
+		//t1.setTitleColor(Color.white);
 		t1.setTitleFont(font);
 		codeTextArea.setBorder(t1);
 		codeTextArea.setBounds(0, 0, 895, 275);
+		//codeTextArea.setMargin(new Insets(10, 10, 10, 10));
 		codeTextArea.setBackground(Color.white);
 		contentpane.add(codeTextArea);
 		
-		//输入区
+		//输入�?
 		inputTextArea=new JTextArea();
 		inputTextArea.setLineWrap(true);
 		TitledBorder t2=new TitledBorder("Input Section");
 		t2.setTitleFont(font);
 		inputTextArea.setBorder(t2);
+		//inputTextArea.setMargin(new Insets(10,10,10,10));
 		inputTextArea.setBackground(Color.WHITE);
 		inputTextArea.setBounds(0, 270, 450, 280);
 		contentpane.add(inputTextArea);
 		
-		// 输出区显示结果
-		resultTextArea = new JTextArea();
-		resultTextArea.setFont(font);
-		resultTextArea.setBackground(Color.WHITE);
-		resultTextArea.setOpaque(true) ;
-		resultTextArea.setEditable(false);
-		resultTextArea.setLineWrap(true);
+		// 输出区显示结�?
+		resultLabel = new JLabel();
+		resultLabel.setFont(font);
+		resultLabel.setBackground(Color.WHITE);
+		resultLabel.setOpaque(true) ;
+		resultLabel.setHorizontalAlignment(JLabel.LEFT);
+		resultLabel.setVerticalAlignment(JLabel.TOP);
 		TitledBorder t3=new TitledBorder("Result");
+		//t3.setTitleColor(Color.white);
 		t3.setTitleFont(font);
-		resultTextArea.setBorder(t3);
-		resultTextArea.setBounds(445, 270, 450, 280);
-		contentpane.add(resultTextArea);
+		resultLabel.setBorder(t3);
+		resultLabel.setBounds(445, 270, 450, 280);
+		contentpane.add(resultLabel);
 		
 		//添加监听
 		newMenuItem.addActionListener(new NewActionListener());
 		openMenuItem.addActionListener(new OpenActionListener());
 		saveMenuItem.addActionListener(new SaveActionListener());
+		//exitMenuItem.addActionListener(new MenuItemActionListener());
 		executeMenuItem.addActionListener(new ExecuteActionListener());
 		signupMenuItem.addActionListener(new SignupActionListener());
 		loginMenuItem.addActionListener(new LoginActionListener());
@@ -201,10 +203,7 @@ public class MainFrame extends JFrame {
 		versionMenuItem.addActionListener(new VersionActionListener());
 		redoMenuItem.addActionListener(new RedoActionListener());
 		undoMenuItem.addActionListener(new UndoActionListener());
-		codeTextArea.getDocument().addDocumentListener(new documentListener());
-		inputTextArea.getDocument().addDocumentListener(new documentListener());
-		resultTextArea.getDocument().addDocumentListener(new documentListener());
-		
+
 		frame.setResizable(false);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setSize(900, 600);
@@ -212,126 +211,6 @@ public class MainFrame extends JFrame {
 		frame.setVisible(true);
 	}
 
-	
-	//撤销重做
-	int formerstate=0;
-	int presentstate=0;//1表示codeTextArea的内容增加，2表示inputTextArea的内容增加，3表示label的内容增加
-	//4表示codeTextArea的内容减少，5表示inputTextArea的内容减少，6表示label的内容减少
-	int state=0;
-	class documentListener implements DocumentListener{
-		@Override
-		public void insertUpdate(DocumentEvent e) {
-				addList();
-				if(e.getDocument().equals(codeTextArea.getDocument())){
-					presentstate=1;
-				}else if(e.getDocument().equals(inputTextArea.getDocument())){
-					presentstate=2;
-				}else{
-					presentstate=3;
-				}
-				if(formerstate!=presentstate){
-					if(index>0)
-						undo.add(list.get(index-1));
-					else
-						undo.add(";;");
-					indexUndo++;
-					System.out.println("addSuccessfully!");
-					System.out.println(undo.get(indexUndo));
-					System.out.println(indexUndo+"indexUndo");
-				}
-				if(indexUndo>=0){
-					undoMenuItem.setEnabled(true);
-				}
-				if(indexRedo>=0){
-					redoMenuItem.setEnabled(true);
-				}
-		}
-		@Override
-		public void removeUpdate(DocumentEvent e) {
-			/*	addList();
-				if(e.getDocument().equals(codeTextArea.getDocument())){
-					presentstate=4;
-				}else if(e.getDocument().equals(inputTextArea.getDocument())){
-					presentstate=5;
-				}else{
-					presentstate=6;
-				}
-			
-				if(formerstate!=presentstate){
-					if(index>0)
-						undo.add(list.get(index-1));
-					else
-						undo.add(";;");
-					indexUndo++;
-				}
-				
-				if(indexUndo>=0){
-					undoMenuItem.setEnabled(true);
-				}
-				if(indexRedo>=0){
-					redoMenuItem.setEnabled(true);
-				}
-				*/
-		}
-
-		@Override
-		public void changedUpdate(DocumentEvent e) {
-		}
-		
-		public void addList(){
-			String code=codeTextArea.getText();
-			String input=inputTextArea.getText();
-			String result=resultTextArea.getText();
-			list.add(code+";"+input+";"+result);
-			index++;
-			formerstate=presentstate;
-		}
-	}
-	
-	public class UndoActionListener implements ActionListener{
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			String string=undo.get(indexUndo);
-			String[] temp=string.split(";",-1);
-			if(!temp[0].equals("")){
-				codeTextArea.setText(temp[0]);
-				undo.remove(indexUndo);
-				indexUndo--;
-			}else{
-				codeTextArea.setText(temp[0]);
-			}
-			if(!temp[1].equals("")){
-				inputTextArea.setText(temp[1]);
-				undo.remove(indexUndo);
-				indexUndo--;
-			}else{
-				inputTextArea.setText(temp[1]);
-			}
-			if(!temp[2].equals("")){
-				resultTextArea.setText(temp[2]);
-				undo.remove(indexUndo);
-				indexUndo--;
-			}else{
-				resultTextArea.setText(temp[2]);
-			}
-			indexUndo--;
-			if(indexUndo<0){
-				indexUndo=0;
-			}
-		}
-	}
-	
-	public class RedoActionListener implements ActionListener{
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			String string=redo.get(indexRedo);
-			String[] temp=string.split(";",-1);
-			
-			indexRedo--;
-		}
-	}
-	
-	
 	//新建文件
 	class NewActionListener implements ActionListener{
 		@Override
@@ -342,12 +221,12 @@ public class MainFrame extends JFrame {
 			else{
 				codeTextArea.setText("");
 				inputTextArea.setText("");
-				resultTextArea.setText("");
-				Object filenameObject=JOptionPane.showInputDialog(frame, "请输入文件名（不加扩展名）",""
+				resultLabel.setText("");
+				Object filenameObject=JOptionPane.showInputDialog(frame, "请输入文件名（不加扩展名�?",""
 						,JOptionPane.INFORMATION_MESSAGE);
 				String filename=String.valueOf(filenameObject);
 				if(filename.equals("")){
-					JOptionPane.showMessageDialog(frame, "文件名不能为空","",JOptionPane.WARNING_MESSAGE);
+					JOptionPane.showMessageDialog(frame, "文件名不能为�?","",JOptionPane.WARNING_MESSAGE);
 				}else if(filenameObject==null){
 				}else{
 					presentFile=filename.replace(".txt", "");
@@ -379,7 +258,7 @@ public class MainFrame extends JFrame {
 				for(int i=0;i<list.size();i++){
 					listObject[i]=list.get(i);
 				}
-				Object filenameObject=JOptionPane.showInputDialog(frame, "请选择你要打开的文件",""
+				Object filenameObject=JOptionPane.showInputDialog(frame, "请�?�择你要打开的文�?",""
 						,JOptionPane.INFORMATION_MESSAGE,null,listObject,null);
 				String filename=String.valueOf(filenameObject);
 				presentFile=filename.replace(".txt", "");
@@ -392,7 +271,7 @@ public class MainFrame extends JFrame {
 				String[] temp=result.split(";",-1);
 				codeTextArea.setText(temp[0]);
 				inputTextArea.setText(temp[1]);
-				resultTextArea.setText(temp[2]);
+				resultLabel.setText(temp[2]);
 			}
 	}
 	}
@@ -404,20 +283,38 @@ public class MainFrame extends JFrame {
 			if(labelUser.getText()==null){
 				JOptionPane.showMessageDialog(frame,"请先登录","",JOptionPane.ERROR_MESSAGE);
 			}else{
-				if(presentFile.equals("")){	
-					//JOptionPane.showMessageDialog(frame, "请先新建一个文件","",JOptionPane.ERROR_MESSAGE);
-					Object filenameObject=JOptionPane.showInputDialog(frame, "请输入文件名（不加扩展名）",""
-							,JOptionPane.INFORMATION_MESSAGE);
+				/*if(presentFile.equals("")){
+					Object filenameObject=JOptionPane.showInputDialog(null, "请输入文件名(不加扩展�?)","",JOptionPane.INFORMATION_MESSAGE);
 					String filename=String.valueOf(filenameObject);
-					if(filename.equals("")){
-						JOptionPane.showMessageDialog(frame, "文件名不能为空","",JOptionPane.WARNING_MESSAGE);
-					}else if(filenameObject==null){
-					}
-					presentFile=filename.replace(".txt", "");
-				}
+					if(filenameObject==null){
+					}else {
+						if(filename.equals("")){
+							JOptionPane.showMessageDialog(null, "文件名不能为�?","",JOptionPane.WARNING_MESSAGE);
+						}else{
+							String code = codeTextArea.getText();
+							String data=inputTextArea.getText();
+							String result=resultLabel.getText();
+							String file=code+";"+data+";"+result;
+							String userId=labelUser.getText();
+							try {
+								boolean isSuccess=RemoteHelper.getInstance().getIOService().writeFile(file, userId, filename);
+								if(isSuccess){
+									JOptionPane.showMessageDialog(null, "保存成功", "",JOptionPane.INFORMATION_MESSAGE);
+								}else{
+									JOptionPane.showMessageDialog(null, "保存失败");
+								}
+							} catch (RemoteException e1) {
+								JOptionPane.showMessageDialog(null, "保存失败");
+								e1.printStackTrace();
+							}
+						}
+					}*/
+				if(presentFile.equals("")){	
+					JOptionPane.showMessageDialog(frame, "请先新建�?个文�?","",JOptionPane.ERROR_MESSAGE);
+				}else{
 					String code = codeTextArea.getText();
 					String data=inputTextArea.getText();
-					String result=resultTextArea.getText();
+					String result=resultLabel.getText();
 					String file=code+";"+data+";"+result;
 					String userId=labelUser.getText();
 					try {
@@ -434,7 +331,7 @@ public class MainFrame extends JFrame {
 				}
 			}
 		}
-	
+	}
 	
 	//logout
 	public class LogoutActionListener implements ActionListener{
@@ -447,7 +344,7 @@ public class MainFrame extends JFrame {
 				e1.printStackTrace();
 			}
 				if(canLogout==true){
-					int choose=JOptionPane.showConfirmDialog(frame, "确定退出吗？","",JOptionPane.YES_NO_OPTION);
+					int choose=JOptionPane.showConfirmDialog(frame, "确定�?出吗�?","",JOptionPane.YES_NO_OPTION);
 						if(choose==JOptionPane.YES_OPTION){
 						try {
 							RemoteHelper.getInstance().getUserService().dologout(labelUser.getText());
@@ -464,7 +361,6 @@ public class MainFrame extends JFrame {
 	
 	//login，弹出登录窗口，结果有登录成功和用户名或密码错误
 	public class LoginActionListener implements ActionListener {
-		Font font=new Font("幼圆",Font.BOLD,15);
 		JFrame frame1;
 		JButton confirm;
 		JButton cancle;
@@ -479,24 +375,19 @@ public class MainFrame extends JFrame {
 				frame1=new JFrame();
 				frame1.setLayout(null);
 				confirm=new JButton("确定");
-				confirm.setFont(font);
 				cancle=new JButton("取消");
-				cancle.setFont(font);
 				confirm.addActionListener(new ButtonActionListener());
 				cancle.addActionListener(new ButtonActionListener());
-				usernameLabel=new JLabel("用户名");
-				usernameLabel.setFont(font);
+				usernameLabel=new JLabel("用户�?");
 				passwordLabel=new JLabel("密码");
-				passwordLabel.setFont(font);
 				title=new JLabel("登录");
-				title.setFont(font);
 				usernameText=new JTextField();
 				passwordText=new JPasswordField();
 				
 				usernameLabel.setBounds(20,30,100,40);
-				usernameText.setBounds(80,35,200,40);
+				usernameText.setBounds(80,30,200,40);
 				passwordLabel.setBounds(20,90,100,40);
-				passwordText.setBounds(80,95,200,40);
+				passwordText.setBounds(80,90,200,40);
 				confirm.setBounds(60,150,80,40);
 				cancle.setBounds(180,150,80,40);
 				title.setBounds(5, 0, 40, 20);
@@ -543,9 +434,8 @@ public class MainFrame extends JFrame {
 		}
 	}
 	
-	//对“sign up”的监听，弹出注册界面，结果有注册成功和用户名已存在
+	//对�?�sign up”的监听，弹出注册界面，结果有注册成功和用户名已存在
 	public class SignupActionListener implements ActionListener {
-		Font font=new Font("幼圆",Font.BOLD,15);
 		JFrame frame1;
 		JButton confirm;
 		JButton cancle;
@@ -559,24 +449,19 @@ public class MainFrame extends JFrame {
 				frame1=new JFrame();
 				frame1.setLayout(null);
 				confirm=new JButton("确定");
-				confirm.setFont(font);
 				cancle=new JButton("取消");
-				cancle.setFont(font);
 				confirm.addActionListener(new ButtonActionListener());
 				cancle.addActionListener(new ButtonActionListener());
-				usernameLabel=new JLabel("用户名");
-				usernameLabel.setFont(font);
+				usernameLabel=new JLabel("用户�?");
 				passwordLabel=new JLabel("密码");
-				passwordLabel.setFont(font);
 				title=new JLabel("注册");
-				title.setFont(font);
 				usernameText=new JTextField();
 				passwordText=new JPasswordField();
 				
-				usernameLabel.setBounds(20,35,100,40);
-				usernameText.setBounds(80,35,200,40);
-				passwordLabel.setBounds(20,95,100,40);
-				passwordText.setBounds(80,95,200,40);
+				usernameLabel.setBounds(20,30,100,40);
+				usernameText.setBounds(80,30,200,40);
+				passwordLabel.setBounds(20,90,100,40);
+				passwordText.setBounds(80,90,200,40);
 				confirm.setBounds(60,150,80,40);
 				cancle.setBounds(180,150,80,40);
 				title.setBounds(5, 0, 40, 20);
@@ -647,7 +532,7 @@ public class MainFrame extends JFrame {
 					for(int i=0;i<list.size();i++){
 						listObject[i]=list.get(i);
 					}
-					Object filenameObject=JOptionPane.showInputDialog(frame, "请选择你要打开的文件",""
+					Object filenameObject=JOptionPane.showInputDialog(frame, "请�?�择你要打开的文�?",""
 						,JOptionPane.INFORMATION_MESSAGE,null,listObject,null);
 					String filename=String.valueOf(filenameObject);
 					String result="";
@@ -659,12 +544,28 @@ public class MainFrame extends JFrame {
 				String[] temp=result.split(";",-1);
 				codeTextArea.setText(temp[0]);
 				inputTextArea.setText(temp[1]);
-				resultTextArea.setText(temp[2]);
+				resultLabel.setText(temp[2]);
 			}
 			}
 			}
 		}
 
+	
+	public class UndoActionListener implements ActionListener{
+		@Override
+		public void actionPerformed(ActionEvent e) {
+				
+		}
+	}
+	
+	public class RedoActionListener implements ActionListener{
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			
+			
+		}
+		
+	}
 	
 	//将代码区和数据区的内容传给remotehelper
 	public class ExecuteActionListener implements ActionListener{
@@ -673,11 +574,10 @@ public class MainFrame extends JFrame {
 			String code=codeTextArea.getText();
 			String param=inputTextArea.getText();
 			try {
-				resultTextArea.setText(RemoteHelper.getInstance().getExecuteService().execute(code, param));
+				resultLabel.setText(RemoteHelper.getInstance().getExecuteService().execute(code, param));
 			} catch (RemoteException e1) {
 				e1.printStackTrace();
 			}
 		}
 	}
 }
-
